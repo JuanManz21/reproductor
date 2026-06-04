@@ -20,7 +20,18 @@ subprojects {
     afterEvaluate {
         if (project.extensions.findByName("android") != null) {
             val android = project.extensions.getByName("android") as com.android.build.gradle.BaseExtension
-            android.namespace = "com.example.lark_player_clone.${project.name.replace("-", "_")}"
+            val manifestFile = project.file("src/main/AndroidManifest.xml")
+            if (manifestFile.exists()) {
+                val manifestContent = manifestFile.readText()
+                val packageMatch = Regex("package=\"([^\"]+)\"").find(manifestContent)
+                if (packageMatch != null) {
+                    val packageName = packageMatch.groupValues[1]
+                    android.namespace = packageName
+                }
+            }
+            if (android.namespace == null) {
+                android.namespace = "com.example.lark_player_clone.${project.name.replace("-", "_")}"
+            }
         }
     }
 }
